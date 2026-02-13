@@ -2,9 +2,11 @@ from abc import ABC, abstractmethod
 
 class Duck(ABC):
     
-    @abstractmethod
+    def __init__(self, fly_behavior):
+        self.__fly_behavior = fly_behavior
+    
     def fly(self):
-        pass
+        self.__fly_behavior.fly()
     
     @abstractmethod
     def quack(self):
@@ -38,11 +40,8 @@ class FlyDry:
 
 class MallardDuck(Duck):
     
-    def __init__(self, fly_behavior: FlyBehavior):
-        self.__fly_behavior = fly_behavior
-    
-    def fly(self):
-        self.__fly_behavior.fly()
+    def __init__(self, fly_behavior: FlyBehavior = FlyCloud()):
+        super().__init__(fly_behavior=fly_behavior)
     
     def quack(self):
         print('Quack loud')
@@ -53,7 +52,7 @@ class MallardDuck(Duck):
 
 class RedHeadDuck(Duck):
     
-    def __init__(self, fly_behavior: FlyBehavior):
+    def __init__(self, fly_behavior: FlyBehavior = FlyNone()):
         self.__fly_behavior = fly_behavior    
 
     def fly(self):
@@ -64,3 +63,9 @@ class RedHeadDuck(Duck):
         
     def display(self):
         print('I"m read head')
+        
+if __name__ == '__main__':
+    donald = MallardDuck()
+    picsou = RedHeadDuck()
+    donald.fly()
+    picsou.fly()
