@@ -13,12 +13,37 @@ class Duck(ABC):
     @abstractmethod
     def display(self):
         pass
+
+class FlyBehavior(ABC):
     
-class MallardDuck(Duck):
+    @abstractmethod
+    def fly(self):
+        pass
+
+class FlyNone:
+    
+    def fly(self):
+        print('I believe I can fly')
+
+class FlyCloud:
     
     def fly(self):
         print('Fly in the cloud')
-        
+
+class FlyDry:
+    
+    def fly(self):
+        print('Fly dry')
+
+
+class MallardDuck(Duck):
+    
+    def __init__(self, fly_behavior: FlyBehavior):
+        self.__fly_behavior = fly_behavior
+    
+    def fly(self):
+        self.__fly_behavior.fly()
+    
     def quack(self):
         print('Quack loud')
         
@@ -27,9 +52,12 @@ class MallardDuck(Duck):
 
 
 class RedHeadDuck(Duck):
+    
+    def __init__(self, fly_behavior: FlyBehavior):
+        self.__fly_behavior = fly_behavior    
 
     def fly(self):
-        print('Fly in the cloud')
+        self.__fly_behavior.fly()
         
     def quack(self):
         print('Quiet loud')
