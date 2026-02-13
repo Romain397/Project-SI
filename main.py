@@ -1,6 +1,6 @@
 # main.py
 
-from moldu_sorcier import Moldu, Sorcier
+from moldu import Moldu, Sorcier
 from strategy.duck import Duck
 from strategy.fly_behavior import FlyWithWings
 from strategy.quack_behavior import Quack
