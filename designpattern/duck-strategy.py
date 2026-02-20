@@ -79,3 +79,5 @@ if __name__ == '__main__':
     donald.fly()
     picsou.fly()
     rubber.fly()
+    ... # ???
+    picsou.fly() # I believe I can fly expected ???
