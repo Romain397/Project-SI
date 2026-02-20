@@ -40,8 +40,8 @@ class FlyDry:
 
 class MallardDuck(Duck):
     
-    def __init__(self, fly_behavior: FlyBehavior = FlyCloud()):
-        super().__init__(fly_behavior=fly_behavior)
+    def __init__(self):
+        super().__init__(fly_behavior=FlyCloud())
     
     def quack(self):
         print('Quack loud')
@@ -52,20 +52,30 @@ class MallardDuck(Duck):
 
 class RedHeadDuck(Duck):
     
-    def __init__(self, fly_behavior: FlyBehavior = FlyNone()):
-        self.__fly_behavior = fly_behavior    
-
-    def fly(self):
-        self.__fly_behavior.fly()
+    def __init__(self):
+        super().__init__(fly_behavior=FlyDry())   
         
     def quack(self):
         print('Quiet loud')
         
     def display(self):
         print('I"m read head')
+
+class RubberDuck(Duck):
+    
+    def __init__(self):
+        super().__init__(fly_behavior=FlyNone())
         
+    def quack(self):
+        print('Pwick')
+        
+    def display(self):
+        print('Yellow')
+
 if __name__ == '__main__':
     donald = MallardDuck()
     picsou = RedHeadDuck()
+    rubber = RubberDuck()
     donald.fly()
     picsou.fly()
+    rubber.fly()
