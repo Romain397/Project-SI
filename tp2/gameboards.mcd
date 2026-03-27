@@ -1,0 +1,5 @@
+CLIENT: client_id [SERIAL], client_name [TEXT], email [TEXT], password [TEXT], birthdate [DATE]
+PURCHASE, 0N CLIENT, 0N GAMEBOARD: purchase_date [DATE]
+GAMEBOARD: gameboard_id [SERIAL], title [TEXT], description [TEXT], category [TEXT]
+DEVELOP, 11 GAMEBOARD, 0N PUBLISHER: publishing_date [DATE]
+PUBLISHER: publisher_id [SERIAL], publisher_name [TEXT]

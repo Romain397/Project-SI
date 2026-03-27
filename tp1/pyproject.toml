@@ -1,0 +1,7 @@
+[project]
+name = "hexagone-2b-2insi-2026-tp1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []

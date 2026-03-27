@@ -1,0 +1,10 @@
+services:
+  gameboard_db:
+    image: postgres:11
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=gameboards
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
