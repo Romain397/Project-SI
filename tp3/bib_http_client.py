@@ -20,7 +20,7 @@ class ConsoleInput:
         self.should_continue = True
     
     def create_new_gameboard(self):
-        title = input('Title: ')
+        # title = input('Title: ')
         author = input('Author: ')
         price = float(input('Price: '))
         return {
