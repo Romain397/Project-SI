@@ -21,9 +21,23 @@ py -3.13 tp3/bib_server.py
 
 Terminal 2 :
 
-```bash
+```powershell
+$env:BIB_CLIENT_NAME='alice'
+$env:BIB_CLIENT_PORT='10001'
 py -3.13 tp3/bib_client.py
 ```
+
+Terminal 3 :
+
+```powershell
+$env:BIB_CLIENT_NAME='bob'
+$env:BIB_CLIENT_PORT='10002'
+py -3.13 tp3/bib_client.py
+```
+
+Chaque client demarre son propre mini-serveur local et recoit les
+notifications des creations, modifications et suppressions declenchees
+par les autres clients.
 
 ### 3. Architecture client/serveur HTTP JSON
 
