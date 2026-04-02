@@ -1,65 +1,87 @@
-from dataclasses import dataclass, field
+from pathlib import Path
 
-class Singleton(type):
-    
-    __instance = None
-    
-    def __call__(cls, *args, **kwargs):
-        if cls.__instance is None:
-            cls.__instance = super().__call__(*args, **kwargs)
-        return cls.__instance
+from bib_core import JsonFileRepository, LibraryService, NotFoundError, format_game
 
-class GameBoardSequence(metaclass=Singleton):
-    def __init__(self):
-        self.__next_id = 0
-    
-    @property
-    def next_id(self):
-        self.__next_id += 1
-        return self.__next_id
 
-@dataclass(unsafe_hash=True)
-class GameBoard:
-    id: int = field(init=False)
-    title: str
-    author: str
-    price: float
-    
-    def __post_init__(self):
-        self.id = GameBoardSequence().next_id
-        
-@dataclass
-class GameLibrary:
-    gameboards: set[GameBoard] = field(default_factory=set)
-    should_continue : bool = field(default=True)        
+DATA_FILE = Path(__file__).with_name("bib_data.json")
 
-    def create_new_gameboard(self):
-        title = input('Title: ')
-        author = input('Author: ')
-        price = float(input('Price: '))
-        self.gameboards.add(GameBoard(title, author, price))
 
-    def delete_gameboard(self):
-        id_to_delete = int(input('Id to delete: '))
-        self.gameboards = set(filter(lambda gameboard: id_to_delete != gameboard.id, self.gameboards))
+class ConsoleApp:
+    def __init__(self) -> None:
+        self.service = LibraryService(JsonFileRepository(DATA_FILE))
+        self.should_continue = True
 
-    def list_gameboards(self):
-        print(self.gameboards)
-        
-    def should_exit(self):
+    def help(self) -> None:
+        print("Actions disponibles :")
+        print("  c : creer un jeu")
+        print("  u : mettre a jour un jeu")
+        print("  g : consulter un jeu")
+        print("  l : lister tous les jeux")
+        print("  d : supprimer un jeu")
+        print("  h : afficher l'aide")
+        print("  q : quitter")
+
+    def create_game(self) -> None:
+        payload = self._read_game_payload()
+        print(format_game(self.service.create_game(payload)))
+
+    def update_game(self) -> None:
+        game_id = int(input("Id du jeu a modifier: "))
+        payload = self._read_game_payload()
+        payload["id"] = game_id
+        print(format_game(self.service.update_game(payload)))
+
+    def get_game(self) -> None:
+        game_id = int(input("Id du jeu a consulter: "))
+        print(format_game(self.service.get_game({"id": game_id})))
+
+    def list_games(self) -> None:
+        games = self.service.list_games()
+        if not games:
+            print("Aucun jeu enregistre.")
+            return
+        for game in games:
+            print(format_game(game))
+
+    def delete_game(self) -> None:
+        game_id = int(input("Id du jeu a supprimer: "))
+        result = self.service.delete_game({"id": game_id})
+        print(f"Jeu {result['deleted_id']} supprime.")
+
+    def quit(self) -> None:
         self.should_continue = False
-                
-if __name__ == '__main__':
-    
-    #TODO: ask user action and do it
-    gl = GameLibrary()
+
+    @staticmethod
+    def _read_game_payload() -> dict:
+        return {
+            "title": input("Titre: ").strip(),
+            "author": input("Auteur: ").strip(),
+            "content": input("Contenu: ").strip(),
+        }
+
+
+if __name__ == "__main__":
+    app = ConsoleApp()
     actions = {
-        'h': lambda : print('Help'),
-        'c': gl.create_new_gameboard,
-        'd': gl.delete_gameboard,
-        'l': gl.list_gameboards,
-        'q': gl.should_exit
+        "h": app.help,
+        "c": app.create_game,
+        "u": app.update_game,
+        "g": app.get_game,
+        "l": app.list_games,
+        "d": app.delete_game,
+        "q": app.quit,
     }
-    while gl.should_continue:
-        input_action = input('Action: ')
-        actions[input_action]()
+
+    app.help()
+    while app.should_continue:
+        action = input("Action: ").strip().lower()
+        handler = actions.get(action)
+        if handler is None:
+            print("Action inconnue. Tapez h pour l'aide.")
+            continue
+        try:
+            handler()
+        except ValueError as error:
+            print(f"Erreur de saisie: {error}")
+        except NotFoundError as error:
+            print(error)

@@ -1,75 +1,109 @@
-import socket
 import json
+import socket
+
+from bib_core import format_game
 
 
 HOST, PORT = "localhost", 9999
 
-# Create a socket (SOCK_STREAM means a TCP socket)
-def send_message(msg_json):
-    data = json.dumps(msg_json)
+
+def send_message(payload: dict) -> dict | list[dict]:
+    data = json.dumps(payload)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        # Connect to server and send data
         sock.connect((HOST, PORT))
-        sock.sendall(bytes(data, "utf-8"))
+        sock.sendall(data.encode("utf-8"))
         sock.sendall(b"\n")
 
-        # Receive data from the server and shut down
-        received = str(sock.recv(1024), "utf-8")
+        chunks: list[bytes] = []
+        while True:
+            chunk = sock.recv(4096)
+            if not chunk:
+                break
+            chunks.append(chunk)
 
+    response_text = b"".join(chunks).decode("utf-8")
     print("Sent:    ", data)
-    print("Received:", received)
-    return received
+    print("Received:", response_text)
+    return json.loads(response_text)
 
 
 class ConsoleInput:
-    
-    def __init__(self):
+    def __init__(self) -> None:
         self.should_continue = True
-    
-    def create_new_gameboard(self) -> dict:
-        title = input('Title: ')
-        author = input('Author: ')
-        price = float(input('Price: '))
+
+    def help(self) -> None:
+        print("Actions disponibles : c u g l d h q")
+
+    def create_game(self) -> dict:
         return {
-            'action': 'c',
-            'title': title,
-            'author': author,
-            'price': price
+            "action": "c",
+            "title": input("Titre: ").strip(),
+            "author": input("Auteur: ").strip(),
+            "content": input("Contenu: ").strip(),
         }
 
-    def delete_gameboard(self) -> dict:
-        id_to_delete = int(input('Id to delete: '))
+    def update_game(self) -> dict:
         return {
-            'action': 'd',
-            'id_to_delete': id_to_delete
+            "action": "u",
+            "id": int(input("Id du jeu a modifier: ")),
+            "title": input("Titre: ").strip(),
+            "author": input("Auteur: ").strip(),
+            "content": input("Contenu: ").strip(),
         }
 
-    def list_gameboards(self) -> dict:
+    def get_game(self) -> dict:
         return {
-            'action': 'l'
+            "action": "g",
+            "id": int(input("Id du jeu a consulter: ")),
         }
-        
-    def should_exit(self) -> None:
+
+    def delete_game(self) -> dict:
+        return {
+            "action": "d",
+            "id": int(input("Id du jeu a supprimer: ")),
+        }
+
+    @staticmethod
+    def list_games() -> dict:
+        return {"action": "l"}
+
+    def quit(self) -> None:
         self.should_continue = False
+        return None
 
-if __name__ == '__main__':
-    
+
+def print_result(result: dict | list[dict]) -> None:
+    if isinstance(result, list):
+        if not result:
+            print("Aucun jeu enregistre.")
+            return
+        for game in result:
+            print(format_game(game))
+        return
+    if {"id", "title", "author", "content"}.issubset(result):
+        print(format_game(result))
+        return
+    print(result)
+
+
+if __name__ == "__main__":
     ci = ConsoleInput()
     actions = {
-        'h': lambda : print('Help'),
-        'c': ci.create_new_gameboard,
-        'd': ci.delete_gameboard,
-        'l': ci.list_gameboards,
-        'q': ci.should_exit
+        "h": ci.help,
+        "c": ci.create_game,
+        "u": ci.update_game,
+        "g": ci.get_game,
+        "d": ci.delete_game,
+        "l": ci.list_games,
+        "q": ci.quit,
     }
+    ci.help()
     while ci.should_continue:
-        input_action = input('Action: ')
-        msg_json = actions[input_action]()
-        if msg_json is not None:
-            result_str = send_message(msg_json)
-            result_json = None
-            try:
-                result_json = json.loads(result_str)
-            except:
-                ...
-            print(result_json)
+        input_action = input("Action: ").strip().lower()
+        handler = actions.get(input_action)
+        if handler is None:
+            print("Action inconnue.")
+            continue
+        message = handler()
+        if message is not None:
+            print_result(send_message(message))
