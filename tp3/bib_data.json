@@ -1,0 +1,11 @@
+{
+  "next_id": 2,
+  "games": [
+    {
+      "id": 1,
+      "title": "Duck",
+      "author": "Donald",
+      "content": "Duck war"
+    }
+  ]
+}

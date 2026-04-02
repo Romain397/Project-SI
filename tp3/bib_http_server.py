@@ -82,7 +82,7 @@ class BibHttpHandler(BaseHTTPRequestHandler):
     @staticmethod
     def _extract_id(path: str) -> int | None:
         normalized = path.strip("/")
-        if normalized == "games":
+        if normalized in ("", "games"):
             return None
         prefix = "games/"
         if normalized.startswith(prefix):
