@@ -1,88 +1,29 @@
-## TP3 - Architectures de communication
-
-Ce dossier contient une implementation complete du CRUD "jeu de societe"
-avec les champs obligatoires `title`, `author` et `content`.
-
-### 1. Architecture monolithique
+Commande pour initialiser un projet vide d'un repo GIT déjà existant
 
 ```bash
-py -3.13 tp3/bib.py
+uv init . --bare
 ```
 
-Les donnees sont persistees dans `tp3/bib_data.json`.
-
-### 2. Architecture client/serveur TCP JSON
-
-Terminal 1 :
+Modifier la version de Python utilisée par défaut avec
 
 ```bash
-py -3.13 tp3/bib_server.py
+uv python pin 3.12
 ```
 
-Terminal 2 :
-
-```powershell
-$env:BIB_CLIENT_NAME='alice'
-$env:BIB_CLIENT_PORT='10001'
-py -3.13 tp3/bib_client.py
-```
-
-Terminal 3 :
-
-```powershell
-$env:BIB_CLIENT_NAME='bob'
-$env:BIB_CLIENT_PORT='10002'
-py -3.13 tp3/bib_client.py
-```
-
-Chaque client demarre son propre mini-serveur local et recoit les
-notifications des creations, modifications et suppressions declenchees
-par les autres clients.
-
-### 3. Architecture client/serveur HTTP JSON
-
-Terminal 1 :
+Télécharger le fichier brut des gitignore
 
 ```bash
-py -3.13 tp3/bib_http_server.py
+wget https://raw.githubusercontent.com/github/gitignore/refs/heads/main/Python.gitignore
 ```
 
-Terminal 2 :
+Démarrer une base de données pour assurer le tiers 3
 
 ```bash
-py -3.13 tp3/bib_http_client.py
+docker run -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_DB=gameboard postgres:latest
 ```
 
-### 4. Architecture 3-tier HTTP -> TCP -> SQLite
-
-Terminal 1 :
+Installer les dépendances
 
 ```bash
-py -3.13 tp3/bib_server_tier_2.py
+uv add psycopg2-binary
 ```
-
-Terminal 2 :
-
-```bash
-$env:BIB_HTTP_BACKEND='tcp'
-$env:BIB_TCP_BACKEND_PORT='9998'
-py -3.13 tp3/bib_http_server.py
-```
-
-Terminal 3 :
-
-```bash
-py -3.13 tp3/bib_http_client.py
-```
-
-Les donnees du tier 2 sont persistees dans `tp3/bib.sqlite3`.
-
-### Actions disponibles
-
-- `c` : creer un jeu
-- `u` : mettre a jour un jeu
-- `g` : consulter un jeu
-- `l` : lister tous les jeux
-- `d` : supprimer un jeu
-- `h` : aide
-- `q` : quitter
